@@ -1,6 +1,6 @@
 from datetime import datetime, timedelta
 
-# -------- Abstraction: Subscription Plan --------
+
 class SubscriptionPlan:
     def __init__(self, name, duration, price):
         self.name = name
