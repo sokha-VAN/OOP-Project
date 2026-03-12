@@ -1,0 +1,144 @@
+from datetime import datetime, timedelta
+
+class SubcriptionPlan:
+    def __init__(self, plan_name, duration, plan_price):
+        self.plan_name = plan_name
+        self.duration = duration
+        self.plan_price = plan_price
+
+    def __str__(self):
+        return f"{self.plan_name} - Duration: {self.duration}days - Price: {self.plan_price}"
+    
+class Member:
+    def __init__(self, member_id, name, sex, phone, plan, join_date):
+        self.__member_id = member_id
+        self.__name = name
+        self.__sex = sex
+        self.__phone = phone
+        self.__plan = plan
+        self.__join_date = join_date
+        self.__expiry_date = self.__calculate_expiry()
+
+    def __calculate_expiry(self):
+        return self.__join_date + timedelta(days= self.__plan.duration)
+    
+    def get_member_id(self):
+        return self.__member_id
+    def get_name(self):
+        return self.__name
+    def get_phone(self):
+        return self.__phone
+    def set_phone(self, new_phone):
+        if len(new_phone)>8:
+            self.__phone = new_phone
+            return True
+        else:
+            return False
+        
+    def set_plan(self, new_plan):
+        self.__plan = new_plan
+        self.__expiry_date = self.__calculate_expiry()
+
+    def get_status(self):
+        if datetime.now() <= self.__expiry_date:
+            return "Active"
+        else:
+            return "Expired"
+        
+    def __str__(self):
+        return (f"ID: {self.get_member_id()} | Name: {self.get_name()} | {self.__sex} | "
+                f"Phone: {self.get_phone()} | Plan: {self.__plan.plan_name} | "
+                f"Exp: {self.__expiry_date.date()} | {self.get_status()}")
+        
+
+class GymSystem:
+    def __init__(self):
+        self.__members = []
+        self.__plans = {}
+
+    def add_subcription_plan(self):
+        print("\n--- Create New Subscription Plan ---")
+        name = input("Enter Subcription Plan Name:").strip()
+        duration = int(input("Ënter Duration (days): "))
+        price = float(input("Enter Price: $"))
+        plan_id = str(len(self.__plans)+1)
+        self.__plans[plan_id] = SubcriptionPlan(name, duration, price)
+        print(f"Plan '{name}' added successfully!")
+
+    def add_member(self):
+        if not self.__plans:
+            print("ERROR: Create a plan first (Option 1).")     
+            return 
+        print("\n--- Add Member ---")
+        mid = input("Enter member id:").strip()
+        for x in self.__members:
+            if x.get_member_id() == mid:
+                print(f" ERROR: ID {mid} already exists!")
+                return
+        name = input("Enter Name: ")
+        sex = input("Enter Sex (M/F): ").upper()
+        phone = input("Enter Phone: ").strip()
+        for x in self.__members:
+            if x.get_phone() == phone:
+                print(f" ERROR: Phone already registered!")
+                return
+        print("\nSelect Plan:")
+        for k, v in self.__plans.items():
+            print(f"{k}, {v}")
+        choice = input("Choice: ")
+        if choice in self.__plans:
+            date_in = input("Enter Join Date (DD-MM-YYYY): ").strip()
+            join_date = datetime.strptime(date_in, "%d-%m-%Y")
+            new_memmber = Member(mid, name, sex, phone, self.__plans[choice], join_date)
+            self.__members.append(new_memmber)
+            print("✅ Member registered!")
+        else:
+            print("please select the right choice!!")
+
+    def view_member(self):
+        print("\n--- Current Members ---")
+        if not self.__members:
+            print("No  record founded!")
+            return
+        for m in self.__members:
+            print(m)
+
+    def search_member(self):
+        print("\n--- Search Member ---")
+        phone = input("Enter Phone Number:").strip()
+        for x in self.__members:
+            if x.get_phone() == phone:
+                print(f"Found: {x}")    
+                return
+        print("No member found!")    
+
+    def delete_member(self):
+        print("\n--- Delete Member ---")
+        phone = input("Ennter Phone to delete:").strip()
+        found = None
+        for x in self.__members:
+            if x.get_phone() == phone:
+                found = x
+                break
+        if found:
+            self.__members.remove(found)
+            print(f"Member with phone {phone} has been deleted.")
+        else:
+            print("No member found with that phone number!")
+
+
+    def menu(self):
+            while True:
+                print("\n--- Gym Membership System ---")
+                print("1. Add Plan | 2. Add Member | 3. View All | 4. Search | 5. Update | 6. Delete | 7. Exit")
+                c = input("Option: ")
+                if c == "1": self.add_subcription_plan()
+                elif c == "2": self.add_member()
+                elif c == "3": self.view_member()
+                elif c == "4": self.search_member()
+                elif c == "5": self.update_member()
+                elif c == "6": self.delete_member()
+                elif c == "7": break
+
+if __name__ == "__main__":
+    GymSystem().menu()                          
